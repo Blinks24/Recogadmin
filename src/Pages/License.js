@@ -161,6 +161,7 @@ const License = () => {
     address3: "",
     // ✅ NEW
     maxothours: "",
+    bookwise: false,
   });
 
   // Activate/Cancel confirm dialog
@@ -264,6 +265,11 @@ const License = () => {
       <Chip label={noLabel} size="small" variant="outlined" />
     );
   };
+  const toBool = (v) =>
+    v === true ||
+    v === 1 ||
+    v === "1" ||
+    (typeof v === "string" && v.trim().toLowerCase() === "true");
 
   const openConfirm = (mode, row) => setConfirm({ open: true, mode, row });
   const closeConfirm = () => setConfirm({ open: false, mode: null, row: null });
@@ -361,6 +367,16 @@ const License = () => {
         renderCell: (p) => {
           const v = p?.row?.maxothours;
           return <Chip label={v === null || v === undefined ? "—" : String(v)} size="small" variant="outlined" />;
+        },
+      },
+      {
+        field: "bookwise",
+        headerName: "Bookwise",
+        width: 115,
+        renderCell: (p) => {
+          const v = p?.row?.bookwise;
+          if (v === null || v === undefined) return <Chip label="—" size="small" variant="outlined" />;
+          return boolChip(!!toBool(v), "True", "False", "—", "primary");
         },
       },
 
@@ -572,6 +588,7 @@ const License = () => {
           (r.companyname || "").toLowerCase().includes(q) ||
           (r.companycode || "").toLowerCase().includes(q) ||
           String(r.maxothours ?? "").toLowerCase().includes(q) ||
+          String(r.bookwise ?? "").toLowerCase().includes(q) ||
           (r.licenseid || "").toLowerCase().includes(q) ||
           (r.deviceid || "").toLowerCase().includes(q) ||
           (r.status || "").toLowerCase().includes(q) ||
@@ -620,6 +637,7 @@ const License = () => {
           (r.companyname || "").toLowerCase().includes(q) ||
           (r.companycode || "").toLowerCase().includes(q) ||
           String(r.maxothours ?? "").toLowerCase().includes(q) ||
+          String(r.bookwise ?? "").toLowerCase().includes(q) ||
           (r.licenseid || "").toLowerCase().includes(q) ||
           (r.deviceid || "").toLowerCase().includes(q) ||
           (r.status || "").toLowerCase().includes(q) ||
@@ -641,6 +659,7 @@ const License = () => {
         { key: "companyname", title: "Company" },
         { key: "companycode", title: "Code" },
         { key: "maxothours", title: "MaxOTHours" },
+        { key: "bookwise", title: "Bookwise" },
         { key: "licenseid", title: "License" },
         { key: "deviceid", title: "Device" },
         { key: "validmonth", title: "Months" },
@@ -722,6 +741,7 @@ const License = () => {
       address2: "",
       address3: "",
       maxothours: "",
+      bookwise: false,
     });
     setCompanyEditPick(null);
     setIsEditMode(false);
@@ -738,6 +758,7 @@ const License = () => {
       address3: pick.address3 || "",
       maxothours:
         pick.maxothours === null || pick.maxothours === undefined ? "" : String(pick.maxothours),
+      bookwise: toBool(pick.bookwise),
     });
   };
 
@@ -791,6 +812,7 @@ const License = () => {
           companyForm.maxothours === "" || companyForm.maxothours === null || companyForm.maxothours === undefined
             ? null
             : Number(companyForm.maxothours),
+        bookwise: !!companyForm.bookwise,
       };
 
       const res = await fetch(`${API_BASE}/company`, {
@@ -827,6 +849,7 @@ const License = () => {
           companyForm.maxothours === "" || companyForm.maxothours === null || companyForm.maxothours === undefined
             ? null
             : Number(companyForm.maxothours),
+        bookwise: !!companyForm.bookwise,
       };
 
       const res = await fetch(`${API_BASE}/company/${companyEditPick.companyid}`, {
@@ -1040,6 +1063,15 @@ const License = () => {
                   <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
                     Max OT Hours:{" "}
                     <b>{companyInput?.maxothours === null || companyInput?.maxothours === undefined ? "—" : companyInput.maxothours}</b>
+                    {" • "}
+                    Bookwise:{" "}
+                    <b>
+                      {companyInput?.bookwise === null || companyInput?.bookwise === undefined
+                        ? "—"
+                        : toBool(companyInput?.bookwise)
+                          ? "True"
+                          : "False"}
+                    </b>
                   </Typography>
                 )}
               </Grid>
@@ -1209,7 +1241,22 @@ const License = () => {
                   size="small"
                 />
               </Grid>
-              <Grid item xs={12} md={4} />
+              <Grid item xs={12} md={4}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={!!companyForm.bookwise}
+                      onChange={(e) =>
+                        setCompanyForm((prev) => ({
+                          ...prev,
+                          bookwise: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label={`Bookwise: ${companyForm.bookwise ? "True" : "False"}`}
+                />
+              </Grid>
 
               <Grid item xs={12} md={4}>
                 <TextField
